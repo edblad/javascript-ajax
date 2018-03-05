@@ -9,20 +9,19 @@ const stationsRequest = `
 </REQUEST>
 `;
 
-const postOptions = {
+const stationsOptions = {
     method: 'POST',
     headers: { 'content-type': 'text/xml' },
     body: stationsRequest
 }
 
 function fetchStation(){
-fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', postOptions)
+fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationsOptions)
     .then(function(response){       
         return response.json();
     })
     .then(function(data){           
         console.log(data);
-        console.log(data.RESPONSE.RESULT[0].TrainAnnouncement[0].ToLocation[0].LocationName)
     })
     .catch(function(error){
         console.log(error)
@@ -30,3 +29,54 @@ fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', postOptions)
 }
 
 fetchStation();
+
+
+const stationsTimeTable = `
+<REQUEST>
+  <LOGIN authenticationkey="${authKey}" />
+  <QUERY objecttype="TrainAnnouncement" orderby="AdvertisedTimeAtLocation">
+    <FILTER>
+      <AND>
+        <EQ name="ActivityType" value="Avgang" />
+        <EQ name="LocationSignature" value="Cst" />
+        <OR>
+          <AND>
+            <GT name="AdvertisedTimeAtLocation" value="$dateadd(-00:15:00)" />
+            <LT name="AdvertisedTimeAtLocation" value="$dateadd(14:00:00)" />
+          </AND>
+          <AND>
+            <LT name="AdvertisedTimeAtLocation" value="$dateadd(00:30:00)" />
+            <GT name="EstimatedTimeAtLocation" value="$dateadd(-00:15:00)" />
+          </AND>
+        </OR>
+      </AND>
+    </FILTER>
+    <INCLUDE>AdvertisedTrainIdent</INCLUDE>
+    <INCLUDE>AdvertisedTimeAtLocation</INCLUDE>
+    <INCLUDE>AdvertisedLocationName</INCLUDE>
+    <INCLUDE>TrackAtLocation</INCLUDE>
+    <INCLUDE>ToLocation</INCLUDE>
+  </QUERY>
+</REQUEST>
+`;
+
+const timeTableOptions = {
+    method: 'POST',
+    headers: { 'content-type': 'text/xml' },
+    body: stationsTimeTable
+}
+
+function fetchTimeTable(){
+fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', timeTableOptions)
+    .then(function(response){       
+        return response.json();
+    })
+    .then(function(data){           
+        console.log(data);
+    })
+    .catch(function(error){
+        console.log(error)
+    });
+}
+
+fetchTimeTable();
