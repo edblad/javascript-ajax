@@ -21,7 +21,8 @@ fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationsOptions)
         return response.json();
     })
     .then(function(data){           
-        console.log(data);
+        //console.log(data);
+        returnSomething(data);
     })
     .catch(function(error){
         console.log(error)
@@ -72,7 +73,8 @@ fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', timeTableOptions)
         return response.json();
     })
     .then(function(data){           
-        console.log(data);
+        //console.log(data);
+        showSomething()
     })
     .catch(function(error){
         console.log(error)
@@ -80,3 +82,15 @@ fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', timeTableOptions)
 }
 
 fetchTimeTable();
+
+function returnSomething(data){
+    const dataArray = data.RESPONSE.RESULT[0].TrainStation
+    for(i=0;i<dataArray.length;i++){
+        console.log(dataArray[i].AdvertisedLocationName);
+    }
+    console.log(dataArray);
+}
+
+function showSomething(){
+   // console
+}
