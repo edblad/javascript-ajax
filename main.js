@@ -1,4 +1,5 @@
 const authKey = '08fd13eb5afe4d5dbc7ba3a4ddd5ddcd';
+const button = document.getElementById('button');
 
 const stationsRequest = `
 <REQUEST>
@@ -21,16 +22,13 @@ fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationsOptions)
         return response.json();
     })
     .then(function(data){           
-        //console.log(data);
-        returnStation(data);
+        console.log(data.RESPONSE.RESULT[0]);
+        //returnStation(data);
     })
     .catch(function(error){
         console.log(error)
     });
 }
-
-fetchStation();
-
 
 const stationsTimeTable = `
 <REQUEST>
@@ -54,7 +52,6 @@ const stationsTimeTable = `
     </FILTER>
     <INCLUDE>AdvertisedTrainIdent</INCLUDE>
     <INCLUDE>AdvertisedTimeAtLocation</INCLUDE>
-    <INCLUDE>AdvertisedLocationName</INCLUDE>
     <INCLUDE>TrackAtLocation</INCLUDE>
     <INCLUDE>ToLocation</INCLUDE>
   </QUERY>
@@ -72,35 +69,45 @@ fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', timeTableOptions)
     .then(function(response){       
         return response.json();
     })
-    .then(function(data){           
-        //console.log(data);
-        showSomething(data)
+    .then(function(data){
+        const dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
+        for(i = 0; i < dataArray.length; i++){
+            console.log(dataArray[i]);
+        }
+        //showSomething(data)
     })
     .catch(function(error){
         console.log(error)
     });
 }
 
+fetchStation();
 fetchTimeTable();
 
 function returnStation(data){
     const dataArray = data.RESPONSE.RESULT[0].TrainStation;
-    
-    for(i=0;i<dataArray.length;i++){
+    console.log(data.RESPONSE.RESULT[0]);
+    for(i = 0; i < dataArray.length; i++){
         if(dataArray[i].LocationSignature == 'A'){
-            console.log(dataArray[i].AdvertisedLocationName);
+            //console.log(dataArray[i].AdvertisedLocationName);
         }
     }
-    console.log(dataArray);
+    //console.log(dataArray);
 }
 
 function showSomething(data){
     const dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
-    
-    for(i=0;i<dataArray.length;i++){
-        //return dataArray[142].ToLocation[0].LocationName
-        console.log(dataArray[142].ToLocation[0].LocationName);
+    console.log(data.RESPONSE.RESULT[0]);
+    let clickedLocation = '';
+    for(i = 0; i < dataArray.length; i++){
+        clickedLocation = dataArray[200].ToLocation[0].LocationName;
     }
+    //console.log(clickedLocation);
+    //return clickedLocation;
 }
 
 
+button.addEventListener('click', function(){
+    fetchTimeTable();
+    fetchStation();
+});
