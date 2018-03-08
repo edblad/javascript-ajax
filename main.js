@@ -1,34 +1,36 @@
 const authKey = '08fd13eb5afe4d5dbc7ba3a4ddd5ddcd';
 const button = document.getElementById('button');
+const searchCity = document.getElementById('searchCity');
 
 const stationsRequest = `
-<REQUEST>
-  <LOGIN authenticationkey="${authKey}" />
-  <QUERY objecttype="TrainStation">
-    <FILTER />
-  </QUERY>
-</REQUEST>
-`;
+    <REQUEST>
+      <LOGIN authenticationkey="${authKey}" />
+      <QUERY objecttype="TrainStation">
+        <FILTER />
+      </QUERY>
+    </REQUEST>
+    `;
 
-const stationsOptions = {
-    method: 'POST',
-    headers: { 'content-type': 'text/xml' },
-    body: stationsRequest
-}
+    const stationsOptions = {
+        method: 'POST',
+        headers: { 'content-type': 'text/xml' },
+        body: stationsRequest
+    }
 
-function fetchStation(){
-fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationsOptions)
-    .then(function(response){       
-        return response.json();
-    })
-    .then(function(data){           
-        console.log(data.RESPONSE.RESULT[0]);
-        //returnStation(data);
-    })
-    .catch(function(error){
-        console.log(error)
-    });
-}
+    function fetchStation(searchValue){
+    fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationsOptions)
+        .then(function(response){       
+            return response.json();
+        })
+        .then(function(stationData){    
+            getStation(stationData, searchValue);
+            //console.log(data.RESPONSE.RESULT[0]);
+            //returnStation(data);
+        })
+        .catch(function(error){
+            console.log(error)
+        });
+    }
 
 const stationsTimeTable = `
 <REQUEST>
@@ -71,9 +73,14 @@ fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', timeTableOptions)
     })
     .then(function(data){
         const dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
-        for(i = 0; i < dataArray.length; i++){
-            console.log(dataArray[i]);
-        }
+        console.log(dataArray);
+        
+//            for(const i = 0; i < dataArray.length; i++){
+//                if(dataArray[i].ToLocation[0].LocationName){
+//                    console.log(dataArray[i].ToLocation[0].LocationName);
+//                }
+//            }
+        
         //showSomething(data)
     })
     .catch(function(error){
@@ -81,33 +88,47 @@ fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', timeTableOptions)
     });
 }
 
-fetchStation();
-fetchTimeTable();
+//fetchStation();
+//fetchTimeTable();
 
-function returnStation(data){
-    const dataArray = data.RESPONSE.RESULT[0].TrainStation;
-    console.log(data.RESPONSE.RESULT[0]);
-    for(i = 0; i < dataArray.length; i++){
-        if(dataArray[i].LocationSignature == 'A'){
-            //console.log(dataArray[i].AdvertisedLocationName);
-        }
-    }
-    //console.log(dataArray);
-}
-
-function showSomething(data){
-    const dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
-    console.log(data.RESPONSE.RESULT[0]);
-    let clickedLocation = '';
-    for(i = 0; i < dataArray.length; i++){
-        clickedLocation = dataArray[200].ToLocation[0].LocationName;
-    }
-    //console.log(clickedLocation);
-    //return clickedLocation;
-}
+//function returnStation(data){
+//    const dataArray = data.RESPONSE.RESULT[0].TrainStation;
+//    console.log(data.RESPONSE.RESULT[0]);
+//    for(i = 0; i < dataArray.length; i++){
+//        if(dataArray[i].LocationSignature == 'A'){
+//            //console.log(dataArray[i].AdvertisedLocationName);
+//        }
+//    }
+//    //console.log(dataArray);
+//}
+//
+//function showSomething(data){
+//    const dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
+//    console.log(data.RESPONSE.RESULT[0]);
+//    let clickedLocation = '';
+//    for(i = 0; i < dataArray.length; i++){
+//        clickedLocation = dataArray[200].ToLocation[0].LocationName;
+//    }
+//    //console.log(clickedLocation);
+//    //return clickedLocation;
+//}
 
 
 button.addEventListener('click', function(){
     fetchTimeTable();
     fetchStation();
 });
+
+searchCity.addEventListener('change', function(){
+    const searchValue = searchCity.value;
+    fetchStation(searchValue);
+});
+
+function getStation(stationData, searchValue){
+    const dataArray = stationData.RESPONSE.RESULT[0].TrainStation;
+    for(i = 0; i < dataArray.length; i++){
+        if(searchValue == dataArray[i].AdvertisedLocationName){
+           console.log(dataArray[i].AdvertisedLocationName)
+        }
+    }
+}
