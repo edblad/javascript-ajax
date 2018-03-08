@@ -126,9 +126,29 @@ searchCity.addEventListener('change', function(){
 
 function getStation(stationData, searchValue){
     const dataArray = stationData.RESPONSE.RESULT[0].TrainStation;
+    let shortStationName = '';
+    
     for(i = 0; i < dataArray.length; i++){
         if(searchValue == dataArray[i].AdvertisedLocationName){
-           console.log(dataArray[i].AdvertisedLocationName)
+           shortStationName = dataArray[i].LocationSignature;
         }
     }
+    
+    return shortStationName;
+//    console.log(shortStationName);
+//    console.log(dataArray);
+//    fetchTimeTable();
 }
+
+//function getShortStationName(stationName){
+//    const dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
+//
+//    for(i = 0; i < dataArray.length; i++){
+//        console(stationName)
+//    }
+//    //console.log(clickedLocation);
+//    //return clickedLocation;
+//}
+//
+
+
