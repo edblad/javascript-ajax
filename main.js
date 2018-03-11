@@ -1,7 +1,9 @@
 const authKey = '08fd13eb5afe4d5dbc7ba3a4ddd5ddcd';
 const button = document.getElementById('button');
 const searchCity = document.getElementById('searchCity');
+let station = '';
 
+// Request to fetch all train stations in Sweden
 const stationsRequest = `
     <REQUEST>
       <LOGIN authenticationkey="${authKey}" />
@@ -11,81 +13,76 @@ const stationsRequest = `
     </REQUEST>
     `;
 
-    const stationsOptions = {
-        method: 'POST',
-        headers: { 'content-type': 'text/xml' },
-        body: stationsRequest
-    }
+const stationsOptions = {
+    method: 'POST',
+    headers: { 'content-type': 'text/xml' },
+    body: stationsRequest
+}
 
-    function fetchStation(searchValue){
+function fetchStation(searchValue){
     fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationsOptions)
         .then(function(response){       
             return response.json();
         })
         .then(function(stationData){    
-            getStation(stationData, searchValue);
-            //console.log(data.RESPONSE.RESULT[0]);
-            //returnStation(data);
+            shortStationName(stationData, searchValue);
         })
         .catch(function(error){
             console.log(error)
         });
-    }
-
-const stationsTimeTable = `
-<REQUEST>
-  <LOGIN authenticationkey="${authKey}" />
-  <QUERY objecttype="TrainAnnouncement" orderby="AdvertisedTimeAtLocation">
-    <FILTER>
-      <AND>
-        <EQ name="ActivityType" value="Avgang" />
-        <EQ name="LocationSignature" value="Cst" />
-        <OR>
-          <AND>
-            <GT name="AdvertisedTimeAtLocation" value="$dateadd(-00:15:00)" />
-            <LT name="AdvertisedTimeAtLocation" value="$dateadd(14:00:00)" />
-          </AND>
-          <AND>
-            <LT name="AdvertisedTimeAtLocation" value="$dateadd(00:30:00)" />
-            <GT name="EstimatedTimeAtLocation" value="$dateadd(-00:15:00)" />
-          </AND>
-        </OR>
-      </AND>
-    </FILTER>
-    <INCLUDE>AdvertisedTrainIdent</INCLUDE>
-    <INCLUDE>AdvertisedTimeAtLocation</INCLUDE>
-    <INCLUDE>TrackAtLocation</INCLUDE>
-    <INCLUDE>ToLocation</INCLUDE>
-  </QUERY>
-</REQUEST>
-`;
-
-const timeTableOptions = {
-    method: 'POST',
-    headers: { 'content-type': 'text/xml' },
-    body: stationsTimeTable
 }
 
+
 function fetchTimeTable(){
-fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', timeTableOptions)
-    .then(function(response){       
-        return response.json();
-    })
-    .then(function(data){
-        const dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
-        console.log(dataArray);
-        
-//            for(const i = 0; i < dataArray.length; i++){
-//                if(dataArray[i].ToLocation[0].LocationName){
-//                    console.log(dataArray[i].ToLocation[0].LocationName);
-//                }
-//            }
-        
-        //showSomething(data)
-    })
-    .catch(function(error){
-        console.log(error)
-    });
+    /* Request to fetch all announcements at a specific train station
+     * The station name is fetched by the function fetchStation 
+     */
+    let stationsTimeTable = `
+    <REQUEST>
+      <LOGIN authenticationkey="${authKey}" />
+      <QUERY objecttype="TrainAnnouncement" orderby="AdvertisedTimeAtLocation">
+        <FILTER>
+          <AND>
+            <EQ name="ActivityType" value="Avgang" />
+            <EQ name="LocationSignature" value="${station}" />
+            <OR>
+              <AND>
+                <GT name="AdvertisedTimeAtLocation" value="$dateadd(-00:15:00)" />
+                <LT name="AdvertisedTimeAtLocation" value="$dateadd(14:00:00)" />
+              </AND>
+              <AND>
+                <LT name="AdvertisedTimeAtLocation" value="$dateadd(00:30:00)" />
+                <GT name="EstimatedTimeAtLocation" value="$dateadd(-00:15:00)" />
+              </AND>
+            </OR>
+          </AND>
+        </FILTER>
+        <INCLUDE>AdvertisedTrainIdent</INCLUDE>
+        <INCLUDE>AdvertisedTimeAtLocation</INCLUDE>
+        <INCLUDE>TrackAtLocation</INCLUDE>
+        <INCLUDE>ToLocation</INCLUDE>
+      </QUERY>
+    </REQUEST>
+    `;
+
+    const timeTableOptions = {
+        method: 'POST',
+        headers: { 'content-type': 'text/xml' },
+        body: stationsTimeTable
+    }
+    
+    fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', timeTableOptions)
+        .then(function(response){       
+            return response.json();
+        })
+        .then(function(data){      
+            console.log(data);
+            
+            //showStation(data);
+        })
+        .catch(function(error){
+            console.log(error)
+        });
 }
 
 //fetchStation();
@@ -124,31 +121,40 @@ searchCity.addEventListener('change', function(){
     fetchStation(searchValue);
 });
 
-function getStation(stationData, searchValue){
+function shortStationName(stationData, searchValue){
     const dataArray = stationData.RESPONSE.RESULT[0].TrainStation;
     let shortStationName = '';
     
     for(i = 0; i < dataArray.length; i++){
         if(searchValue == dataArray[i].AdvertisedLocationName){
-           shortStationName = dataArray[i].LocationSignature;
+            station = dataArray[i].LocationSignature;
+            fetchTimeTable();
         }
     }
-    
-    return shortStationName;
-//    console.log(shortStationName);
-//    console.log(dataArray);
-//    fetchTimeTable();
 }
 
-//function getShortStationName(stationName){
-//    const dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
-//
-//    for(i = 0; i < dataArray.length; i++){
-//        console(stationName)
+function showStation(data){
+    
+    
+    
+    
+    
+    
+//    let dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
+//    console.log(dataArray);
+//    console.log(shortStationName);
+//    console.log(station);
+//    for(let i = 0; i < dataArray.length; i++){
+//        if(dataArray[i].ToLocation){
+//            if(shortStationName === dataArray[i].ToLocation[0].LocationName){
+//                console.log(dataArray[i].ToLocation[0].LocationName);
+//                station = dataArray[i].ToLocation[0].LocationName;
+//            }
+//        }
 //    }
-//    //console.log(clickedLocation);
-//    //return clickedLocation;
-//}
-//
+}
+
+
+
 
 
