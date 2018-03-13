@@ -147,7 +147,7 @@ function fullStationName(stationName, track, time, trainNumber){
             let paragraph = document.createElement('p');
             let stationName = data.RESPONSE.RESULT[0].TrainStation[0].AdvertisedLocationName;
             
-            paragraph.innerHTML += `${stationName} <br />`;
+            paragraph.innerHTML += `${time}, ${stationName}, ${track}, ${trainNumber} <br />`;
             output.appendChild(paragraph);
             })
         .catch(function(error){
