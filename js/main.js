@@ -5,11 +5,13 @@ let departArrive = '';
 let time = '';
 let trainNumber = '';
 let track = '';
+let newTime = '';
 
 const searchCity = document.getElementById('searchCity');
 const output = document.getElementById('output');
 const departure = document.getElementById('departure');
 const arrival = document.getElementById('arrival');
+const tableHead = document.getElementById('tableHead');
 
 
 // EVENT LISTENERS //
@@ -84,8 +86,10 @@ function fetchTimeTable(){
         </FILTER>
         <INCLUDE>AdvertisedTrainIdent</INCLUDE>
         <INCLUDE>AdvertisedTimeAtLocation</INCLUDE>
+        <INCLUDE>Canceled</INCLUDE>
         <INCLUDE>TrackAtLocation</INCLUDE>
         <INCLUDE>ToLocation</INCLUDE>
+        <INCLUDE>EstimatedTimeAtLocation</INCLUDE>
       </QUERY>
     </REQUEST>
     `;
@@ -121,7 +125,7 @@ function shortStationName(stationData, searchValue){
     }
 }
 
-function fullStationName(stationName, track, time, trainNumber){
+function fullStationName(stationName, track, time, trainNumber, newTime){
     const request = `
         <REQUEST>
           <LOGIN authenticationkey="${authKey}" />
@@ -144,11 +148,11 @@ function fullStationName(stationName, track, time, trainNumber){
             return response.json();
         })
         .then(function(data){
-            let paragraph = document.createElement('p');
+            let tableRow = document.createElement('tr');
             let stationName = data.RESPONSE.RESULT[0].TrainStation[0].AdvertisedLocationName;
             
-            paragraph.innerHTML += `${time}, ${stationName}, ${track}, ${trainNumber} <br />`;
-            output.appendChild(paragraph);
+            tableRow.innerHTML += `<td>${time}</td><td>${stationName}</td><td>${newTime}</td><td>${track}</td><td>${trainNumber}</td>`;
+            output.appendChild(tableRow);
             })
         .catch(function(error){
             console.log(error)
@@ -158,14 +162,20 @@ function fullStationName(stationName, track, time, trainNumber){
 function showTrains(data){
     let dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
     
+    tableHead.classList = 'showTableHead';
+    
     for(let i = 0; i < dataArray.length; i++){
         if(dataArray[i].ToLocation){
+            newTime = '';
             stationName = dataArray[i].ToLocation[0].LocationName;
             track = dataArray[i].TrackAtLocation;
             time = dataArray[i].AdvertisedTimeAtLocation;
             trainNumber = dataArray[i].AdvertisedTrainIdent;
+            if(dataArray[i].EstimatedTimeAtLocation){
+                newTime = dataArray[i].EstimatedTimeAtLocation;
+            }
             
-            fullStationName(stationName, track, time, trainNumber);
+            fullStationName(stationName, track, time, trainNumber, newTime);
             
         }
     }

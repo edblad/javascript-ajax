@@ -5,6 +5,7 @@
 body{
     margin: 0;
     font-family: sans-serif;
+    background: black;
 }
 
 .wrapper{
@@ -17,21 +18,46 @@ body{
     display: flex;
     justify-content: center;
     width: 600px;
+    margin-top: 30px;
 }
 
 input{
     padding: 10px;
     display: block;
+    border: none;
+    border-radius: 5px;
 }
 
 .output{
-    background: black;
     color: white;
     padding: 10px;
     width: 600px;
 }
 
-p{
+table{
+    border: none;
+    border-spacing: 0px 10px;
+}
+
+th{
+    text-align: left;
+    border: none;
+}
+
+.tableHead{
+    display: none;
+}
+
+.showTableHead{
+    display: table-row;
+    background: black;
+}
+
+tr{
     background: #202020;
-    padding: 5px;
+}
+
+td{
+    padding: 7px;
+    border: none;
 }
