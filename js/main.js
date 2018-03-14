@@ -19,6 +19,7 @@ const cityHeadline = document.getElementById('city');
 
 // EVENT LISTENERS //
 departure.addEventListener('click', function(){
+    
     if(searchCity.value){
         departArrive = 'Avgang';
 
@@ -69,7 +70,6 @@ const stationsOptions = {
     headers: { 'content-type': 'text/xml' },
     body: stationsRequest
 }
-
 
 // FUNCTIONS //
 function fetchStation(searchValue){
@@ -192,7 +192,7 @@ function fullStationName(stationName, track, time, trainNumber, newTime){
 
 function showTrains(data){
     let dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
-
+    
     tableHead.classList = 'showTableHead';
     
     for(let i = 0; i < dataArray.length; i++){
@@ -208,20 +208,20 @@ function showTrains(data){
             }
             
             fullStationName(stationName, track, time, trainNumber, newTime);
-            
         }
     }
 }
 
+function addZero(i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
 
 function getTime(timeDate) {
     let fullDateTime = new Date(timeDate);
-    let h = fullDateTime.getHours();
-    let m = fullDateTime.getMinutes();
+    let h = addZero(fullDateTime.getHours());
+    let m = addZero(fullDateTime.getMinutes());
     return h + "." + m;
 }
-
-
-
-
-
