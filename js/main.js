@@ -1,3 +1,4 @@
+// VARIABLES //
 const authKey = '08fd13eb5afe4d5dbc7ba3a4ddd5ddcd';
 let station = '';
 let stationName = '';
@@ -6,26 +7,45 @@ let time = '';
 let trainNumber = '';
 let track = '';
 let newTime = '';
+let searchValue = '';
 
 const searchCity = document.getElementById('searchCity');
 const output = document.getElementById('output');
 const departure = document.getElementById('departure');
 const arrival = document.getElementById('arrival');
 const tableHead = document.getElementById('tableHead');
+const cityHeadline = document.getElementById('city');
 
 
 // EVENT LISTENERS //
 departure.addEventListener('click', function(){
-    departArrive = 'Avgang';
+    if(searchCity.value){
+        departArrive = 'Avgang';
+
+        searchValue = searchCity.value;
+        fetchStation(searchValue);
+
+        searchCity.value = '';
+    }
 })
 
 arrival.addEventListener('click', function(){
-    departArrive = 'Ankomst';
-})
+    if(searchCity.value){
+        departArrive = 'Ankomst';
 
-searchCity.addEventListener('change', function(){
-    const searchValue = searchCity.value;
-    fetchStation(searchValue);
+        searchValue = searchCity.value;
+        fetchStation(searchValue);
+
+        searchCity.value = '';
+    }
+    else{
+        if(cityHeadline){
+           searchValue = cityHeadline.innerText;
+        }
+        output.innerHTML = '';
+        departArrive = 'Ankomst';
+        fetchStation(searchValue);
+    }
 })
 
 // Request to fetch all train stations in Sweden
@@ -51,7 +71,8 @@ function fetchStation(searchValue){
         .then(function(response){       
             return response.json();
         })
-        .then(function(stationData){    
+        .then(function(stationData){
+            //Look up the short name for the station
             shortStationName(stationData, searchValue);
         })
         .catch(function(error){
@@ -105,7 +126,7 @@ function fetchTimeTable(){
             return response.json();
         })
         .then(function(data){      
-            console.log(data);
+            //console.log(data);
             showTrains(data);
         })
         .catch(function(error){
@@ -115,8 +136,12 @@ function fetchTimeTable(){
 
 function shortStationName(stationData, searchValue){
     const dataArray = stationData.RESPONSE.RESULT[0].TrainStation;
-    let shortStationName = '';
     
+    cityHeadline.innerHTML = searchValue;
+    
+    //let shortStationName = '';
+    
+    // Check if trainstation exists and give 'station' the short name for the station
     for(i = 0; i < dataArray.length; i++){
         if(searchValue == dataArray[i].AdvertisedLocationName){
             station = dataArray[i].LocationSignature;
@@ -161,7 +186,7 @@ function fullStationName(stationName, track, time, trainNumber, newTime){
 
 function showTrains(data){
     let dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
-    
+
     tableHead.classList = 'showTableHead';
     
     for(let i = 0; i < dataArray.length; i++){
