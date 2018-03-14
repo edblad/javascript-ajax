@@ -132,7 +132,7 @@ function fetchTimeTable(){
             return response.json();
         })
         .then(function(data){      
-            //console.log(data);
+            console.log(data);
             showTrains(data);
         })
         .catch(function(error){
@@ -200,10 +200,11 @@ function showTrains(data){
             newTime = '';
             stationName = dataArray[i].ToLocation[0].LocationName;
             track = dataArray[i].TrackAtLocation;
-            time = dataArray[i].AdvertisedTimeAtLocation;
+            time = getTime(dataArray[i].AdvertisedTimeAtLocation);
             trainNumber = dataArray[i].AdvertisedTrainIdent;
+            
             if(dataArray[i].EstimatedTimeAtLocation){
-                newTime = dataArray[i].EstimatedTimeAtLocation;
+                newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
             }
             
             fullStationName(stationName, track, time, trainNumber, newTime);
@@ -212,6 +213,13 @@ function showTrains(data){
     }
 }
 
+
+function getTime(timeDate) {
+    let fullDateTime = new Date(timeDate);
+    let h = fullDateTime.getHours();
+    let m = fullDateTime.getMinutes();
+    return h + "." + m;
+}
 
 
 
