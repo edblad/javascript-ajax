@@ -26,6 +26,13 @@ departure.addEventListener('click', function(){
         fetchStation(searchValue);
 
         searchCity.value = '';
+    }else{
+        if(cityHeadline){
+           searchValue = cityHeadline.innerText;
+        }
+        output.innerHTML = '';
+        departArrive = 'Avgang';
+        fetchStation(searchValue);
     }
 })
 
@@ -37,8 +44,7 @@ arrival.addEventListener('click', function(){
         fetchStation(searchValue);
 
         searchCity.value = '';
-    }
-    else{
+    }else{
         if(cityHeadline){
            searchValue = cityHeadline.innerText;
         }

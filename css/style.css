@@ -33,15 +33,12 @@ h1{
     margin-bottom: 0;
 }
 
-.output{
-    color: white;
-    padding: 10px;
-    width: 600px;
-}
-
 table{
     border: none;
     border-spacing: 0px 10px;
+    color: white;
+    padding: 10px;
+    width: 600px;
 }
 
 th{
