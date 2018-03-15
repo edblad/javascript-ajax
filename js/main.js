@@ -130,10 +130,12 @@ function fetchTimeTable(){
             </OR>
           </AND>
         </FILTER>
+        <INCLUDE>ActivityType</INCLUDE>
         <INCLUDE>AdvertisedTrainIdent</INCLUDE>
         <INCLUDE>AdvertisedTimeAtLocation</INCLUDE>
         <INCLUDE>TrackAtLocation</INCLUDE>
         <INCLUDE>ToLocation</INCLUDE>
+        <INCLUDE>FromLocation</INCLUDE>
         <INCLUDE>EstimatedTimeAtLocation</INCLUDE>
       </QUERY>
     </REQUEST>
@@ -151,6 +153,7 @@ function fetchTimeTable(){
         })
         .then(function(data){      
             showTrains(data);
+            console.log(data);
         })
         .catch(function(error){
             errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
@@ -217,18 +220,34 @@ async function showTrains(data){
     tableHead.classList = 'showTableHead';
     
     for(let i = 0; i < dataArray.length; i++){
-        if(dataArray[i].ToLocation){
-            newTime = '';
-            stationName = dataArray[i].ToLocation[0].LocationName;
-            track = dataArray[i].TrackAtLocation;
-            time = getTime(dataArray[i].AdvertisedTimeAtLocation);
-            trainNumber = dataArray[i].AdvertisedTrainIdent;
-            
-            if(dataArray[i].EstimatedTimeAtLocation){
-                newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
+        if(dataArray[i].ActivityType == 'Avgang'){
+            if(dataArray[i].ToLocation){
+                newTime = '';
+                stationName = dataArray[i].ToLocation[0].LocationName;
+                track = dataArray[i].TrackAtLocation;
+                time = getTime(dataArray[i].AdvertisedTimeAtLocation);
+                trainNumber = dataArray[i].AdvertisedTrainIdent;
+
+                if(dataArray[i].EstimatedTimeAtLocation){
+                    newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
+                }
+
+                await fullStationName(stationName, track, time, trainNumber, newTime);
             }
-            
-            await fullStationName(stationName, track, time, trainNumber, newTime);
+        }else{
+            if(dataArray[i].FromLocation){
+                newTime = '';
+                stationName = dataArray[i].FromLocation[0].LocationName;
+                track = dataArray[i].TrackAtLocation;
+                time = getTime(dataArray[i].AdvertisedTimeAtLocation);
+                trainNumber = dataArray[i].AdvertisedTrainIdent;
+
+                if(dataArray[i].EstimatedTimeAtLocation){
+                    newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
+                }
+
+                await fullStationName(stationName, track, time, trainNumber, newTime);
+            }
         }
     }
 }
