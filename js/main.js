@@ -104,7 +104,7 @@ function fetchCity(searchValue){
             fetchTimeTable(city);
         })
         .catch(function(error){
-            errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
+            errorMessage.innerHTML = `<p>Nu blev det något fel</p><p>${error}</p>`;
         });
 }
 
@@ -157,7 +157,7 @@ function fetchTimeTable(station){
             showTimeTable(data);
         })
         .catch(function(error){
-            errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
+            errorMessage.innerHTML = `<p>Nu blev det något fel</p><p>${error}</p>`;
         });
 }
 
@@ -213,7 +213,7 @@ async function fullStationName(stationName, track, time, trainNumber, newTime){
         output.appendChild(tableRow);
     }
     catch(error) {
-        errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
+        errorMessage.innerHTML = `<p>Nu blev det något fel</p><p>${error}</p>`;
     }
 }
 
