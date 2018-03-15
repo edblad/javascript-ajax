@@ -1,6 +1,6 @@
 ////// VARIABLES //////
 const authKey = '08fd13eb5afe4d5dbc7ba3a4ddd5ddcd';
-let station = '';
+let shortStation = '';
 let stationName = '';
 let departArrive = '';
 let time = '';
@@ -45,8 +45,10 @@ const stationsOptions = {
 }
 
 ////// FUNCTIONS //////
-function clickedButton(param){
-    if(param === 'departure'){
+
+// Runs when the departure button or the arrival button is clicked
+function clickedButton(clicked){
+    if(clicked == 'departure'){
         departure.classList = 'activeButton';
         arrival.classList = 'inactiveButton';
         toFrom.innerHTML = 'Till';
@@ -55,19 +57,19 @@ function clickedButton(param){
             departArrive = 'Avgang';
 
             searchValue = searchCity.value;
-            fetchStation(searchValue);
+            fetchCity(searchValue);
 
             searchCity.value = '';
             output.innerHTML = '';
         }else{
             if(cityHeadline){
-               searchValue = cityHeadline.innerText;
+                searchValue = cityHeadline.innerText;
+                output.innerHTML = '';
+                departArrive = 'Avgang';
+                fetchCity(searchValue);
             }
-            output.innerHTML = '';
-            departArrive = 'Avgang';
-            fetchStation(searchValue);
         }
-    }else if(param === 'arrival'){
+    }else if(clicked == 'arrival'){
         departure.classList = 'inactiveButton';
         arrival.classList = 'activeButton';
         toFrom.innerHTML = 'Från';
@@ -76,29 +78,30 @@ function clickedButton(param){
             departArrive = 'Ankomst';
 
             searchValue = searchCity.value;
-            fetchStation(searchValue);
+            fetchCity(searchValue);
 
             searchCity.value = '';
             output.innerHTML = '';
-        }else{
+        }else{                  // If thers not 
             if(cityHeadline){
-               searchValue = cityHeadline.innerText;
+                searchValue = cityHeadline.innerText;
+                output.innerHTML = '';
+                departArrive = 'Ankomst';
+                fetchCity(searchValue);
             }
-            output.innerHTML = '';
-            departArrive = 'Ankomst';
-            fetchStation(searchValue);
         }
     }
 }
 
-function fetchStation(searchValue){
+function fetchCity(searchValue){
     fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationsOptions)
         .then(function(response){       
             return response.json();
         })
         .then(function(stationData){
-            //Look up the short name for the station
-            shortStationName(stationData, searchValue);
+            //Look up the short name for the station and put it into a variable
+            let city = shortStationName(stationData, searchValue);
+            fetchTimeTable(city);
         })
         .catch(function(error){
             errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
@@ -106,10 +109,9 @@ function fetchStation(searchValue){
 }
 
 
-function fetchTimeTable(){
+function fetchTimeTable(station){
     /* Request to fetch all announcements at a specific train station
-     * The station name is fetched by the function fetchStation 
-     */
+     * The station name is fetched by the function fetchCity */
     let stationsTimeTable = `
     <REQUEST>
       <LOGIN authenticationkey="${authKey}" />
@@ -152,28 +154,29 @@ function fetchTimeTable(){
             return response.json();
         })
         .then(function(data){      
-            showTrains(data);
-            console.log(data);
+            showTimeTable(data);
         })
         .catch(function(error){
             errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
         });
 }
 
+/* This function takes the search value and all the stations
+ * and looks up the short name for the station searched for */
 function shortStationName(stationData, searchValue){
     const dataArray = stationData.RESPONSE.RESULT[0].TrainStation;
     
-    cityHeadline.innerHTML = searchValue;
-    
-    // Check if trainstation exists and give 'station' the short name for the station
+    // Check if train station exists and give 'shortStation' the short name for the station
     for(i = 0; i < dataArray.length; i++){
-        if(searchValue == dataArray[i].AdvertisedLocationName){
-            station = dataArray[i].LocationSignature;
-            fetchTimeTable();
+        if(searchValue == dataArray[i].AdvertisedShortLocationName || searchValue == dataArray[i].AdvertisedLocationName){
+            cityHeadline.innerHTML = searchValue;   // Print out the headline
+            shortStation = dataArray[i].LocationSignature;
+            return shortStation;
         }
     }
 }
 
+// Fetches the long name of the stations in the timetable and prints them to the page
 async function fullStationName(stationName, track, time, trainNumber, newTime){
     const request = `
         <REQUEST>
@@ -214,41 +217,48 @@ async function fullStationName(stationName, track, time, trainNumber, newTime){
     }
 }
 
-async function showTrains(data){
+async function showTimeTable(data){
     let dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
     
-    tableHead.classList = 'showTableHead';
-    
-    for(let i = 0; i < dataArray.length; i++){
-        if(dataArray[i].ActivityType == 'Avgang'){
-            if(dataArray[i].ToLocation){
-                newTime = '';
-                stationName = dataArray[i].ToLocation[0].LocationName;
-                track = dataArray[i].TrackAtLocation;
-                time = getTime(dataArray[i].AdvertisedTimeAtLocation);
-                trainNumber = dataArray[i].AdvertisedTrainIdent;
+    if(dataArray != undefined){
+        tableHead.classList = 'showTableHead';
+        
+        for(let i = 0; i < dataArray.length; i++){
+            // If user clicked on Departure this will run
+            if(dataArray[i].ActivityType == 'Avgang'){
+                if(dataArray[i].ToLocation){
+                    newTime = '';
+                    stationName = dataArray[i].ToLocation[0].LocationName;
+                    track = dataArray[i].TrackAtLocation;
+                    time = getTime(dataArray[i].AdvertisedTimeAtLocation);
+                    trainNumber = dataArray[i].AdvertisedTrainIdent;
 
-                if(dataArray[i].EstimatedTimeAtLocation){
-                    newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
+                    if(dataArray[i].EstimatedTimeAtLocation){
+                        newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
+                    }
+
+                    await fullStationName(stationName, track, time, trainNumber, newTime);
                 }
+            }else{  // If user clicked on Arrival this will run
+                if(dataArray[i].FromLocation){
+                    newTime = '';
+                    stationName = dataArray[i].FromLocation[0].LocationName;
+                    track = dataArray[i].TrackAtLocation;
+                    time = getTime(dataArray[i].AdvertisedTimeAtLocation);
+                    trainNumber = dataArray[i].AdvertisedTrainIdent;
 
-                await fullStationName(stationName, track, time, trainNumber, newTime);
-            }
-        }else{
-            if(dataArray[i].FromLocation){
-                newTime = '';
-                stationName = dataArray[i].FromLocation[0].LocationName;
-                track = dataArray[i].TrackAtLocation;
-                time = getTime(dataArray[i].AdvertisedTimeAtLocation);
-                trainNumber = dataArray[i].AdvertisedTrainIdent;
+                    if(dataArray[i].EstimatedTimeAtLocation){
+                        newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
+                    }
 
-                if(dataArray[i].EstimatedTimeAtLocation){
-                    newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
+                    await fullStationName(stationName, track, time, trainNumber, newTime);
                 }
-
-                await fullStationName(stationName, track, time, trainNumber, newTime);
             }
-        }
+        }  
+    }else{
+        cityHeadline.innerHTML = '';
+        tableHead.classList = 'tableHead';
+        output.innerHTML = `Prova sök efter en annan tågstation`;
     }
 }
 
@@ -260,12 +270,10 @@ function addZero(i) {
     return i;
 }
 
-// Returns the correct time format
+// Returns the correct time format (hh.mm)
 function getTime(timeDate) {
     let fullDateTime = new Date(timeDate);
     let h = addZero(fullDateTime.getHours());
     let m = addZero(fullDateTime.getMinutes());
     return h + "." + m;
 }
-
-
