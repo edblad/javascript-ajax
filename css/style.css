@@ -35,9 +35,12 @@ input{
 button{
     padding: 5px;
     border-radius: 5px;
-    background: lightgrey;
     border: none;
     cursor: pointer;
+}
+
+.inactiveButton{
+    background: lightgrey;
 }
 
 .activeButton{
@@ -58,7 +61,7 @@ table{
     border-spacing: 0px 10px;
     color: white;
     padding: 10px;
-    width: 600px;
+    width: 400px;
 }
 
 th{
@@ -82,4 +85,14 @@ tr{
 td{
     padding: 7px;
     border: none;
+}
+
+.errorMessage{
+    color: white;
+}
+
+@media screen and (min-width: 650px){
+    table{
+        width: 600px;
+    }
 }

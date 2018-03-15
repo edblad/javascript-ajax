@@ -1,4 +1,4 @@
-// VARIABLES //
+////// VARIABLES //////
 const authKey = '08fd13eb5afe4d5dbc7ba3a4ddd5ddcd';
 let station = '';
 let stationName = '';
@@ -15,44 +15,17 @@ const departure = document.getElementById('departure');
 const arrival = document.getElementById('arrival');
 const tableHead = document.getElementById('tableHead');
 const cityHeadline = document.getElementById('city');
+const toFrom = document.getElementById('toFrom');
+const errorMessage = document.getElementById('errorMessage');
 
 
-// EVENT LISTENERS //
+////// EVENT LISTENERS //////
 departure.addEventListener('click', function(){
-    
-    if(searchCity.value){
-        departArrive = 'Avgang';
-
-        searchValue = searchCity.value;
-        fetchStation(searchValue);
-
-        searchCity.value = '';
-    }else{
-        if(cityHeadline){
-           searchValue = cityHeadline.innerText;
-        }
-        output.innerHTML = '';
-        departArrive = 'Avgang';
-        fetchStation(searchValue);
-    }
+    clickedButton('departure');
 })
 
 arrival.addEventListener('click', function(){
-    if(searchCity.value){
-        departArrive = 'Ankomst';
-
-        searchValue = searchCity.value;
-        fetchStation(searchValue);
-
-        searchCity.value = '';
-    }else{
-        if(cityHeadline){
-           searchValue = cityHeadline.innerText;
-        }
-        output.innerHTML = '';
-        departArrive = 'Ankomst';
-        fetchStation(searchValue);
-    }
+     clickedButton('arrival');
 })
 
 // Request to fetch all train stations in Sweden
@@ -71,7 +44,53 @@ const stationsOptions = {
     body: stationsRequest
 }
 
-// FUNCTIONS //
+////// FUNCTIONS //////
+function clickedButton(param){
+    if(param === 'departure'){
+        departure.classList = 'activeButton';
+        arrival.classList = 'inactiveButton';
+        toFrom.innerHTML = 'Till';
+
+        if(searchCity.value){
+            departArrive = 'Avgang';
+
+            searchValue = searchCity.value;
+            fetchStation(searchValue);
+
+            searchCity.value = '';
+            output.innerHTML = '';
+        }else{
+            if(cityHeadline){
+               searchValue = cityHeadline.innerText;
+            }
+            output.innerHTML = '';
+            departArrive = 'Avgang';
+            fetchStation(searchValue);
+        }
+    }else if(param === 'arrival'){
+        departure.classList = 'inactiveButton';
+        arrival.classList = 'activeButton';
+        toFrom.innerHTML = 'Från';
+        
+        if(searchCity.value){
+            departArrive = 'Ankomst';
+
+            searchValue = searchCity.value;
+            fetchStation(searchValue);
+
+            searchCity.value = '';
+            output.innerHTML = '';
+        }else{
+            if(cityHeadline){
+               searchValue = cityHeadline.innerText;
+            }
+            output.innerHTML = '';
+            departArrive = 'Ankomst';
+            fetchStation(searchValue);
+        }
+    }
+}
+
 function fetchStation(searchValue){
     fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationsOptions)
         .then(function(response){       
@@ -82,7 +101,7 @@ function fetchStation(searchValue){
             shortStationName(stationData, searchValue);
         })
         .catch(function(error){
-            console.log(error)
+            errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
         });
 }
 
@@ -113,7 +132,6 @@ function fetchTimeTable(){
         </FILTER>
         <INCLUDE>AdvertisedTrainIdent</INCLUDE>
         <INCLUDE>AdvertisedTimeAtLocation</INCLUDE>
-        <INCLUDE>Canceled</INCLUDE>
         <INCLUDE>TrackAtLocation</INCLUDE>
         <INCLUDE>ToLocation</INCLUDE>
         <INCLUDE>EstimatedTimeAtLocation</INCLUDE>
@@ -132,11 +150,10 @@ function fetchTimeTable(){
             return response.json();
         })
         .then(function(data){      
-            console.log(data);
             showTrains(data);
         })
         .catch(function(error){
-            console.log(error)
+            errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
         });
 }
 
@@ -144,8 +161,6 @@ function shortStationName(stationData, searchValue){
     const dataArray = stationData.RESPONSE.RESULT[0].TrainStation;
     
     cityHeadline.innerHTML = searchValue;
-    
-    //let shortStationName = '';
     
     // Check if trainstation exists and give 'station' the short name for the station
     for(i = 0; i < dataArray.length; i++){
@@ -156,7 +171,7 @@ function shortStationName(stationData, searchValue){
     }
 }
 
-function fullStationName(stationName, track, time, trainNumber, newTime){
+async function fullStationName(stationName, track, time, trainNumber, newTime){
     const request = `
         <REQUEST>
           <LOGIN authenticationkey="${authKey}" />
@@ -174,23 +189,29 @@ function fullStationName(stationName, track, time, trainNumber, newTime){
         body: request
     }
     
-    fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationOptions)
-        .then(function(response){       
-            return response.json();
-        })
-        .then(function(data){
-            let tableRow = document.createElement('tr');
-            let stationName = data.RESPONSE.RESULT[0].TrainStation[0].AdvertisedLocationName;
-            
-            tableRow.innerHTML += `<td>${time}</td><td>${stationName}</td><td>${newTime}</td><td>${track}</td><td>${trainNumber}</td>`;
-            output.appendChild(tableRow);
-            })
-        .catch(function(error){
-            console.log(error)
-        });
+    try{
+        const response = await fetch('http://api.trafikinfo.trafikverket.se/v1.3/data.json', stationOptions);
+        const data = await response.json();
+
+        let tableRow = document.createElement('tr');
+        stationName = data.RESPONSE.RESULT[0].TrainStation[0].AdvertisedLocationName;
+
+        tableRow.innerHTML += `
+            <td>${time}</td>
+            <td>${stationName}</td>
+            <td>${newTime}</td>
+            <td>${track}</td>
+            <td>${trainNumber}</td>
+        `;
+        
+        output.appendChild(tableRow);
+    }
+    catch(error) {
+        errorMessage.innerHTML = `<p>Nu bev det något fel</p><p>${error}</p>`;
+    }
 }
 
-function showTrains(data){
+async function showTrains(data){
     let dataArray = data.RESPONSE.RESULT[0].TrainAnnouncement;
     
     tableHead.classList = 'showTableHead';
@@ -207,11 +228,12 @@ function showTrains(data){
                 newTime = getTime(dataArray[i].EstimatedTimeAtLocation);
             }
             
-            fullStationName(stationName, track, time, trainNumber, newTime);
+            await fullStationName(stationName, track, time, trainNumber, newTime);
         }
     }
 }
 
+// Add 0 before minutes that are less than 10
 function addZero(i) {
     if (i < 10) {
         i = "0" + i;
@@ -219,9 +241,12 @@ function addZero(i) {
     return i;
 }
 
+// Returns the correct time format
 function getTime(timeDate) {
     let fullDateTime = new Date(timeDate);
     let h = addZero(fullDateTime.getHours());
     let m = addZero(fullDateTime.getMinutes());
     return h + "." + m;
 }
+
+
