@@ -4,8 +4,6 @@
 
 <b>GitHub repository:</b> https://github.com/edblad/javascript-ajax
 
-<b>GitHub Pages:</b> https://edblad.github.io/
-
 <b>Beskrivning:</b> En enkel applikation där användaren kan söka på en stad i Sverige
 och hitta inkommande och avgående tåg från stationen i den staden
 
