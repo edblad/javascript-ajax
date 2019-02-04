@@ -12,10 +12,6 @@ och hitta inkommande och avgående tåg från stationen i den staden
 * CSS 
 * JavaScript
 
-<b>Arbetsprocess:</b> Det tog ganska lång tid innan jag hittade ett API som jag ville och kunde använda. 
-När jag väl hade gjort det tog det ganska lång tid att förstå hur APIet fungerade. Jag hade tyvärr inte heller någon tydlig 
-plan hur jag ville att applikationen skulle se ut eller fungera. Till slut gjorde jag en lista på allt jag ville ha med och satte igång. Jag började med att JavaScripten och enklare struktur i HTML. Sist stylade jag applikationen.
-
 <b>Förbättringspunkter:</b>
 * Göra en rullista istället för inputfältet. Eventuellt ett inputfält med autofill.
 * Göra en laddningsindikator
